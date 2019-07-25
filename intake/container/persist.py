@@ -49,12 +49,12 @@ class PersistStore(YAMLFileCatalog):
 
     def __init__(self, path=None):
         # from fsspec.registry import filesystem
-        from dask.bytes.core import get_fs_token_paths
+        from fsspec import filesystem
         self.pdir = make_path_posix(path or conf.get('persist_path'))
         path = posixpath.join(self.pdir, 'cat.yaml')
         protocol = (self.pdir.split('://', 1)[0]
                     if "://" in self.pdir else 'file')
-        self.fs = get_fs_token_paths(protocol)[0]
+        self.fs = filesystem(protocol)
         _maybe_add_rm(self.fs)
         super(PersistStore, self).__init__(path)
 
