@@ -139,15 +139,17 @@ class CatalogMapper(BaseConverter):
         return self.run(data, *args, **kwargs)
         
     def run(
-        self, in_cat: intake.Catalog, *args, transform=True, name_arg=None, read=False, **kwargs
+        self, in_cat: intake.Catalog, *args, transform=True, name_arg=None,reader_arg=None,token_arg=None, read=False, **kwargs
     ):
         """
         Parameters
         ----------
         transform: do we expect this to be a named transform that intake
             already knows about?
-        name_arg: if give, pass the entry name to the action to be
-            performed using this ad the kwarg name
+        name_arg: if given, pass the entry name to the action to be
+            performed using this as the kwarg name
+        token_arg: if given pass the token of the entrie's data to the action to be
+            performed using this as the kwarg entry.data.token
         read: if True, execute the pipeline produced. This might be used
             where the pipeline output is itself another reader.
         """
@@ -155,6 +157,11 @@ class CatalogMapper(BaseConverter):
         for name in in_cat.entries:
             if name_arg:
                 kwargs[name_arg] = name
+            if reader_arg:
+                kwargs[reader_arg] = in_cat[name].kwargs
+            if token_arg:
+                kwargs[token_arg] = in_cat[name].data.token
+                
             if transform:
                 pipe = in_cat[name].__getattr__(self.func)(*args, **kwargs)
             else:
