@@ -412,7 +412,7 @@ class DuckDB(BaseReader):
                     d = duckdb.connect()
                     d.execute("INSTALL postgres;LOAD postgres;")
                     # extra params possible here https://duckdb.org/docs/extensions/postgres_scanner#usage
-                    d.execute(f"CALL postgres_attach('{conn}');")
+                    d.execute(f"ATTACH '{conn}' as pg (TYPE postgres);")
                 else:
                     d = duckdb.connect(conn)
             else:
