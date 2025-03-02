@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import intake
+from intake.readers.readers import BaseReader
 from intake.readers.convert import BaseConverter, SameType
 from intake.readers.utils import one_to_one
 
@@ -112,14 +113,31 @@ class GetItem(BaseConverter):
 
 
 class CatalogMapper(BaseConverter):
-    instances = {"intake:Catalog": "intake:Catalog"}
+    instances = {"intake:Catalog": "intake:Catalog","intake.readers.entry:Catalog": "intake:Catalog"}
 
-    def __init__(self, func, *args, **kwargs):
+    def __init__(self, func=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.func = func
         self.args = args
         self.kwargs = kwargs
-
+    
+    def _read(self, *args, data=None, **kwargs):
+    
+        if data is None:
+            data = args[0]
+            args = args[1:] 
+    
+        if isinstance(data, BaseReader):
+            data = data.read()
+    
+    
+        if self.func is None and args:
+            self.func = args[0]
+            args = args[1:]  
+            kwargs.pop('metadata',None)
+    
+        return self.run(data, *args, **kwargs)
+        
     def run(
         self, in_cat: intake.Catalog, *args, transform=True, name_arg=None, read=False, **kwargs
     ):
